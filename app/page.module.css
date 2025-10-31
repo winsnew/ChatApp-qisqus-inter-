@@ -1,0 +1,95 @@
+.container {
+  display: flex;
+  height: 100vh;
+  background: white;
+  position: relative;
+}
+
+.sidebarContainer {
+  width: 350px;
+  flex-shrink: 0;
+}
+
+.chatContainer {
+  flex: 1;
+  display: flex;
+}
+
+.noChatSelected {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  color: #6c757d;
+  text-align: center;
+  padding: 2rem;
+}
+
+.noChatSelected h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #495057;
+}
+
+.noChatSelected p {
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .container {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .sidebarContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .sidebarContainer.mobileOpen {
+    transform: translateX(0);
+  }
+  
+  .chatContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 20;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .chatContainer.chatOpen {
+    transform: translateX(0);
+  }
+  
+  .noChatSelected {
+    display: none;
+  }
+  
+  /* Show sidebar by default on mobile when no chat is selected */
+  .sidebarContainer:not(.mobileOpen) + .chatContainer:not(.chatOpen) {
+    transform: translateX(100%);
+  }
+  
+  .sidebarContainer.mobileOpen + .chatContainer {
+    transform: translateX(100%);
+  }
+  
+  .sidebarContainer:not(.mobileOpen) + .chatContainer.chatOpen {
+    transform: translateX(0);
+  }
+}
