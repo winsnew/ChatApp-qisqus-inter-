@@ -6,155 +6,36 @@ import Sidebar from '@/components/Sidebar';
 import ChatRoom from '@/components/ChatRoom';
 import styles from './page.module.css';
 
-const chatData: ChatResponse = {
-  "results": [
-    {
-      "room": {
-        "name": "Product A Support",
-        "id": 12456,
-        "image_url": "https://picsum.photos/id/237/200/300",
-        "last_message": "Baik, silahkan kirimkan lampiran bukti pembayarannya",
-        "last_message_time": "2024-01-01T10:05:00",
-        "unread_count": 2,
-        "participant": [
-          {
-            "id": "admin@mail.com",
-            "name": "Admin",
-            "role": 0
-          },
-          {
-            "id": "agent@mail.com",
-            "name": "Agent A",
-            "role": 1
-          },
-          {
-            "id": "customer@mail.com",
-            "name": "king customer",
-            "role": 2
-          }
-        ]
-      },
-      "comments": [
-        {
-          "id": 885512,
-          "type": "text",
-          "message": "Selamat malam",
-          "sender": "customer@mail.com",
-          "timestamp": "2024-01-01T10:00:00"
-        },
-        {
-          "id": 885513,
-          "type": "text",
-          "message": "Malam",
-          "sender": "agent@mail.com",
-          "timestamp": "2024-01-01T10:01:00"
-        },
-        {
-          "id": 885517,
-          "type": "image",
-          "message": "Bukti pembayaran transfer",
-          "file_url": "https://picsum.photos/id/238/400/300",
-          "file_name": "payment-proof.jpg",
-          "sender": "customer@mail.com",
-          "timestamp": "2024-01-01T10:06:00"
-        }
-      ]
-    },
-    {
-      "room": {
-        "name": "Technical Support",
-        "id": 12457,
-        "image_url": "https://picsum.photos/id/239/200/300",
-        "last_message": "Saya akan kirimkan tutorial penggunaannya",
-        "last_message_time": "2024-01-01T09:30:00",
-        "unread_count": 0,
-        "participant": [
-          {
-            "id": "admin@mail.com",
-            "name": "Admin",
-            "role": 0
-          },
-          {
-            "id": "tech@mail.com",
-            "name": "Tech Support",
-            "role": 1
-          },
-          {
-            "id": "customer@mail.com",
-            "name": "king customer",
-            "role": 2
-          }
-        ]
-      },
-      "comments": [
-        {
-          "id": 885518,
-          "type": "pdf",
-          "message": "Invoice pembayaran",
-          "file_url": "/documents/invoice.pdf",
-          "file_name": "invoice_12345.pdf",
-          "file_size": "2.1 MB",
-          "sender": "tech@mail.com",
-          "timestamp": "2024-01-01T09:25:00"
-        },
-        {
-          "id": 885519,
-          "type": "video",
-          "message": "Tutorial penggunaan produk",
-          "file_url": "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
-          "file_name": "tutorial.mp4",
-          "file_size": "1.5 MB",
-          "sender": "tech@mail.com",
-          "timestamp": "2024-01-01T09:30:00"
-        }
-      ]
-    },
-    {
-      "room": {
-        "name": "Sales Inquiry",
-        "id": 12458,
-        "image_url": "https://picsum.photos/id/240/200/300",
-        "last_message": "Terima kasih atas informasinya",
-        "last_message_time": "2024-01-01T08:45:00",
-        "unread_count": 5,
-        "participant": [
-          {
-            "id": "sales@mail.com",
-            "name": "Sales Agent",
-            "role": 1
-          },
-          {
-            "id": "customer@mail.com",
-            "name": "king customer",
-            "role": 2
-          }
-        ]
-      },
-      "comments": [
-        {
-          "id": 885520,
-          "type": "text",
-          "message": "Saya tertarik dengan produk Anda",
-          "sender": "customer@mail.com",
-          "timestamp": "2024-01-01T08:30:00"
-        },
-        {
-          "id": 885521,
-          "type": "text",
-          "message": "Bisa saya tahu lebih detail?",
-          "sender": "customer@mail.com",
-          "timestamp": "2024-01-01T08:35:00"
-        }
-      ]
-    }
-  ]
-};
-
 export default function HomePage() {
-  const [rooms] = useState<ChatRoomType[]>(chatData.results);
+  const [rooms, setRooms] = useState<ChatRoomType[]>([]);
   const [activeRoom, setActiveRoom] = useState<ChatRoomType | null>(null);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchChatData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/chat');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch chat data');
+        }
+        
+        const chatData: ChatResponse = await response.json();
+        setRooms(chatData.results);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+        console.error('Error fetching chat data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchChatData();
+  }, []);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -217,9 +98,11 @@ export default function HomePage() {
 
     setActiveRoom(updatedRoom);
 
+    // Update rooms state juga
     const updatedRooms = rooms.map(room =>
       room.room.id === updatedRoom.room.id ? updatedRoom : room
     );
+    setRooms(updatedRooms);
   };
 
   useEffect(() => {
@@ -233,6 +116,30 @@ export default function HomePage() {
       document.body.style.overflow = 'unset';
     };
   }, [isMobileSidebarOpen, isMobile]);
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.loading}>
+          <h2>Loading chats...</h2>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.error}>
+          <h2>Error</h2>
+          <p>{error}</p>
+          <button onClick={() => window.location.reload()}>Retry</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
