@@ -98,7 +98,7 @@ export default function HomePage() {
 
     setActiveRoom(updatedRoom);
 
-    // Update rooms state juga
+    
     const updatedRooms = rooms.map(room =>
       room.room.id === updatedRoom.room.id ? updatedRoom : room
     );
@@ -117,7 +117,6 @@ export default function HomePage() {
     };
   }, [isMobileSidebarOpen, isMobile]);
 
-  // Loading state
   if (loading) {
     return (
       <div className={styles.container}>
@@ -128,7 +127,6 @@ export default function HomePage() {
     );
   }
 
-  // Error state
   if (error) {
     return (
       <div className={styles.container}>
